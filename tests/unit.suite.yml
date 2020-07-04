@@ -1,0 +1,17 @@
+# Codeception Test Suite Configuration
+#
+# Suite for unit or integration tests.
+
+actor: UnitTester
+extensions:
+    enabled:
+        - CodeceptionPact\Extension\PhpPact:
+            PACT_CONSUMER_NAME: BookPublisher
+            PACT_PROVIDER_NAME: BookStore
+modules:
+    enabled:
+        - Symfony:
+            app_path: 'src'
+            environment: 'test'
+        - Asserts
+        - \App\Tests\Helper\Unit
