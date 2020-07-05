@@ -5,6 +5,7 @@ namespace App\Tests\unit\Service;
 use App\Message\BookRatingCalculation;
 use App\MessageHandler\BookRatingCalculationHandler;
 use App\Tests\UnitTester;
+use Codeception\Example;
 use PhpPact\Consumer\InteractionBuilder;
 use PhpPact\Consumer\MessageBuilder;
 use PhpPact\Consumer\Model\ConsumerRequest;
@@ -21,6 +22,7 @@ class BookRatingCalculationHandlerCest
     protected object $review;
     protected object $book;
     protected string $reviewIri;
+    protected static $reviewInteractionRegistered = false;
 
     public function _before(UnitTester $I)
     {
@@ -51,12 +53,16 @@ class BookRatingCalculationHandlerCest
         $this->book = $book;
     }
 
-    public function testInvoke(UnitTester $I)
+    /**
+     * @example(page="1")
+     * @example(page="2")
+     * @example(page="3")
+     * @example(page="4")
+     */
+    public function testInvoke(UnitTester $I, Example $example)
     {
-        // for ($page=1; $page < 5; $page++) {
-        //     $this->setUpGettingBooks($page);
-        // }
-        $this->setUpGettingBooks(1);
+        $page = (int) $example['page'];
+        $this->setUpGettingBooks($page);
         $this->setUpGettingReview();
         $this->setUpMessage(function (string $raw) use ($I) {
             $page = json_decode($raw, true)['contents']['page'];
@@ -66,7 +72,7 @@ class BookRatingCalculationHandlerCest
 
             $handler->setBaseUrl($this->config->getBaseUri());
             $handler($message);
-        });
+        }, $page);
 
         $this->messageBuilder->verify();
         $this->interactionBuilder->verify();
@@ -111,13 +117,17 @@ class BookRatingCalculationHandlerCest
             ]);
 
         $this->interactionBuilder->given('Book Fixtures Loaded')
-            ->uponReceiving('A GET request to get books')
+            ->uponReceiving("A GET request to get books at page {$page}")
             ->with($request)
             ->willRespondWith($response);
     }
 
     protected function setUpGettingReview(): void
     {
+        if (static::$reviewInteractionRegistered) {
+            return;
+        }
+
         // build the request
         $request = new ConsumerRequest();
         $request
@@ -145,18 +155,23 @@ class BookRatingCalculationHandlerCest
             ->uponReceiving('A GET request to get review')
             ->with($request)
             ->willRespondWith($response);
+
+        static::$reviewInteractionRegistered = true;
     }
 
-    protected function setUpMessage(callable $callback): void
+    protected function setUpMessage(callable $callback, int $page): void
     {
         $contents       = new \stdClass();
-        $contents->page = '/api/books?page=1';
+        $contents->page = "/api/books?page={$page}";
 
-        $metadata = ['queue'=>'And the clowns have all gone to bed', 'routing_key'=>'And the clowns have all gone to bed'];
+        $metadata = [
+            'queue' => 'messenger-async',
+            'routing_key' => 'messenger-async'
+        ];
 
         $this->messageBuilder
-            ->given('You can hear happiness staggering on down the street')
-            ->expectsToReceive('footprints dressed in red')
+            ->given('Book Fixtures Loaded')
+            ->expectsToReceive('Event to calculate book rating')
             ->withMetadata($metadata)
             ->withContent($contents);
 
