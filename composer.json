@@ -18,7 +18,7 @@
         "codeception/module-asserts": "^1.2",
         "codeception/module-symfony": "^1.1",
         "symfony/maker-bundle": "^1.19",
-        "tienvx/codeception-pact-module": "^1.0"
+        "tienvx/codeception-pact-php-extension": "^1.0"
     },
     "config": {
         "optimize-autoloader": true,
