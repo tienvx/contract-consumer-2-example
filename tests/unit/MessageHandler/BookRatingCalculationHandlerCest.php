@@ -48,7 +48,7 @@ class BookRatingCalculationHandlerCest
         $book->description = $this->matcher->like('Quaerat odit quia nisi accusantium natus voluptatem. Explicabo corporis eligendi ut ut sapiente ut qui quidem. Optio amet velit aut delectus. Sed alias asperiores perspiciatis deserunt omnis. Mollitia unde id in.');
         $book->author = $this->matcher->like('Melisa Kassulke');
         $book->publicationDate = $this->matcher->dateTimeISO8601('1999-02-13T00:00:00+07:00');
-        $book->reviews = $this->matcher->eachLike($review, 0);
+        $book->reviews = $this->matcher->eachLike($review);
 
         $this->book = $book;
     }
