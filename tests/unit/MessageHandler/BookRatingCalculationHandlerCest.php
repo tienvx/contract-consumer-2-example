@@ -19,8 +19,8 @@ class BookRatingCalculationHandlerCest
     protected MockServerEnvConfig $config;
     protected InteractionBuilder $interactionBuilder;
     protected MessageBuilder $messageBuilder;
-    protected object $review;
-    protected object $book;
+    protected array $review;
+    protected array $book;
     protected string $reviewIri;
     protected static $reviewInteractionRegistered = false;
 
@@ -34,23 +34,21 @@ class BookRatingCalculationHandlerCest
 
         $this->reviewIri = '/api/reviews/fb5a885f-f7e8-4a50-950f-c1a64a94d500';
 
-        $review = new \stdClass();
-        $review->{'@id'} = $this->matcher->term($this->reviewIri, '\/api\/reviews\/[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}');
-        $review->{'@type'} = 'http://schema.org/Review';
-        $review->body = $this->matcher->like('Necessitatibus eius commodi odio ut aliquid. Sit enim molestias in minus aliquid repudiandae qui. Distinctio modi officiis eos suscipit. Vel ut modi quia recusandae qui eligendi. Voluptas totam asperiores ab tenetur voluptatem repudiandae reiciendis.');
+        $this->review = [
+            '@id' => $this->matcher->term($this->reviewIri, '\/api\/reviews\/[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}'),
+            '@type' => 'http://schema.org/Review',
+            'body' => $this->matcher->like('Necessitatibus eius commodi odio ut aliquid. Sit enim molestias in minus aliquid repudiandae qui. Distinctio modi officiis eos suscipit. Vel ut modi quia recusandae qui eligendi. Voluptas totam asperiores ab tenetur voluptatem repudiandae reiciendis.'),
+        ];
 
-        $this->review = $review;
-
-        $book = new \stdClass();
-        $book->{'@id'} = $this->matcher->term('/api/books/0114b2a8-3347-49d8-ad99-0e792c5a30e6', '\/api\/books\/[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}');
-        $book->{'@type'} = 'Book';
-        $book->title = $this->matcher->like('Voluptas et tempora repellat corporis excepturi.');
-        $book->description = $this->matcher->like('Quaerat odit quia nisi accusantium natus voluptatem. Explicabo corporis eligendi ut ut sapiente ut qui quidem. Optio amet velit aut delectus. Sed alias asperiores perspiciatis deserunt omnis. Mollitia unde id in.');
-        $book->author = $this->matcher->like('Melisa Kassulke');
-        $book->publicationDate = $this->matcher->dateTimeISO8601('1999-02-13T00:00:00+07:00');
-        $book->reviews = $this->matcher->eachLike($review);
-
-        $this->book = $book;
+        $this->book = [
+            '@id' => $this->matcher->term('/api/books/0114b2a8-3347-49d8-ad99-0e792c5a30e6', '\/api\/books\/[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}'),
+            '@type' => 'Book',
+            'title' => $this->matcher->like('Voluptas et tempora repellat corporis excepturi.'),
+            'description' => $this->matcher->like('Quaerat odit quia nisi accusantium natus voluptatem. Explicabo corporis eligendi ut ut sapiente ut qui quidem. Optio amet velit aut delectus. Sed alias asperiores perspiciatis deserunt omnis. Mollitia unde id in.'),
+            'author' => $this->matcher->like('Melisa Kassulke'),
+            'publicationDate' => $this->matcher->dateTimeISO8601('1999-02-13T00:00:00+07:00'),
+            'reviews' => $this->matcher->eachLike($this->review),
+        ];
     }
 
     /**
@@ -149,7 +147,7 @@ class BookRatingCalculationHandlerCest
                 ],
                 'author' => $this->matcher->like('Taya Paucek V'),
                 'publicationDate' => $this->matcher->dateTimeISO8601('1971-05-06T04:06:57+08:00')
-            ] + (array) $this->review);
+            ] + $this->review);
 
         $this->interactionBuilder->given('Book Fixtures Loaded')
             ->uponReceiving('A GET request to get review')
