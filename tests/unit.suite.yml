@@ -6,14 +6,11 @@ actor: UnitTester
 extensions:
     enabled:
         - CodeceptionPactPhp\Extension\Env:
-            PACT_CONSUMER_NAME: BookRating
+            PACT_CONSUMER_NAME: BookCoverGenerator
             PACT_PROVIDER_NAME: BookStore
             #PACT_SPECIFICATION_VERSION: 3.0.0
         - CodeceptionPactPhp\Extension\Pact
 modules:
     enabled:
-        - Symfony:
-            app_path: 'src'
-            environment: 'test'
         - Asserts
         - \App\Tests\Helper\Unit
