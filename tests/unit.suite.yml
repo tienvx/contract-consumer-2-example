@@ -12,8 +12,5 @@ extensions:
         - CodeceptionPactPhp\Extension\Pact
 modules:
     enabled:
-        - Symfony:
-            app_path: 'src'
-            environment: 'test'
         - Asserts
         - \App\Tests\Helper\Unit
